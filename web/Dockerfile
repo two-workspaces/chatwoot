@@ -1,4 +1,4 @@
-FROM chatwoot/chatwoot:v4.20.1
+FROM chatwoot/chatwoot:v4.20.2
 
 # Rails web. Binds :: (dual-stack) for Railway's IPv6 networking.
 # Migrations run via Railway's preDeployCommand (`rails db:chatwoot_prepare`),

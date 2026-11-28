@@ -38,8 +38,8 @@ Service map:
 
 | Service | Image | Role |
 |---|---|---|
-| web | `chatwoot/chatwoot:v4.20.1` | Rails app + ActionCable, public domain; runs `rails db:chatwoot_prepare` pre-deploy |
-| worker | `chatwoot/chatwoot:v4.20.1` (CMD sidekiq) | Background jobs: mail, automations, campaigns |
+| web | `chatwoot/chatwoot:v4.20.2` | Rails app + ActionCable, public domain; runs `rails db:chatwoot_prepare` pre-deploy |
+| worker | `chatwoot/chatwoot:v4.20.2` (CMD sidekiq) | Background jobs: mail, automations, campaigns |
 | postgres | `pgvector/pgvector:pg16` | Database + vector store (Captain AI), on a volume |
 | redis | `redis:7-alpine` | Sidekiq queues + ActionCable pubsub (append-only, on a volume) |
 
@@ -55,6 +55,7 @@ Notes and limits:
 - Rails binds `::` (dual-stack) in the web Dockerfile — required for Railway's IPv6 networking.
 - Without SMTP variables (`MAILER_SENDER_EMAIL`, `SMTP_*`), password resets and email notifications are silently skipped; live chat and agent workflows work regardless.
 - Captain AI features need an OpenAI-compatible key added in Chatwoot's super-admin console; pgvector is already enabled for it. Since v4.19 Captain runs V2 only: if you used Captain V1 instructions on an older deploy, migrate them before taking this update ([guide](https://github.com/chatwoot/chatwoot/blob/v4.19.0/docs/captain_v1_sunset.md)).
+- Since v4.20.2 the conversation list can sort by last message. On a deploy that already has conversations, run the one-time backfill first: open a shell on the `web` service, run `bundle exec rails runner 'Account.find_each { |a| Migration::BackfillConversationLastMessageAtJob.perform_later(a) }'`, then turn on "Sort conversations by last message" for the account in the super-admin console ([upstream guide](https://github.com/chatwoot/chatwoot/blob/v4.20.2/docs/conversation-last-message-sort.md)). New deploys need nothing.
 - Scale the `worker` service replicas if campaign sends or automations queue up.
 
 ## Why Deploy Chatwoot on Railway?
